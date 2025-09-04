@@ -1,0 +1,155 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User model for authentication and profile management
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique // Bỏ đi @unique => Lí do: đỡ conflict với Google SSO + Tài khoản thường
+  hashPassword  String
+  firstName String?
+  lastName  String?
+  avatar    String?
+  role      Role     @default(USER)
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt // Prisma và cơ sở dữ liệu tự động quản lý. Trường này sẽ được cập nhật mỗi khi có bất kỳ thay đổi nào đối với bản ghi User đó
+  lastLogin DateTime? // phải gọi new Date() để cập nhật thời gian tại ngay thời điểm đó
+  
+  // SaaS relationships
+  organizations OrganizationMember[]
+  createdOrgs   Organization[]       @relation("OrganizationCreator")
+  apiKeys       ApiKey[]
+  // Liên kết các tài khoản SSO
+  ssoAccounts   ssoAccount[]  
+  @@map("users")
+} 
+// ssoAccount model for loging, and registering Account SSO
+
+model ssoAccount {
+  id              String   @id @default(cuid())
+  provider        String   // Google, Facebook, GitHub...
+  providerId String // ID duy nhất do provider cung cấp
+  // Liên kết với User
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  @@unique([provider, providerId]) // Đảm bảo một tài khoản SSO chỉ liên kết một lần
+  @@map("sso_accounts")
+}
+
+// Organization/Tenant model for multi-tenancy
+model Organization {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?
+  logo        String?
+  
+  // Subscription info
+  planType    PlanType @default(FREE)
+  planExpiry  DateTime?
+  
+  // Settings
+  isActive    Boolean  @default(true)
+  
+  // Timestamps
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relationships
+  creator     User                   @relation("OrganizationCreator", fields: [creatorId], references: [id])
+  creatorId   String
+  members     OrganizationMember[]
+  apiKeys     ApiKey[]
+  
+  @@map("organizations")
+}
+
+// Organization membership with roles
+model OrganizationMember {
+  id     String           @id @default(cuid())
+  role   OrganizationRole @default(MEMBER)
+  
+  // Timestamps
+  joinedAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relationships
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organizationId String
+  
+  @@unique([userId, organizationId])
+  @@map("organization_members")
+}
+
+// API Keys for external integrations
+model ApiKey {
+  id        String   @id @default(cuid())
+  name      String
+  key       String   @unique
+  keyHash   String   @unique
+  
+  // Permissions and limits
+  permissions Json?
+  rateLimit   Int      @default(1000) // requests per hour
+  
+  // Status
+  isActive    Boolean  @default(true)
+  lastUsed    DateTime?
+  
+  // Timestamps
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  expiresAt   DateTime?
+  
+  // Relationships
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         String
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organizationId String?
+  
+  @@map("api_keys")
+}
+
+// Enums
+enum Role {
+  ADMIN
+  USER
+}
+
+enum OrganizationRole {
+  OWNER
+  ADMIN
+  MEMBER
+  VIEWER
+}
+
+enum PlanType {
+  FREE
+  BASIC
+  PRO
+  ENTERPRISE
+}
+
+enum SSOProvider {
+  GOOGLE
+  FACEBOOK  
+}
