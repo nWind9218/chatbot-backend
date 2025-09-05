@@ -1,5 +1,6 @@
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
+const path = require('path');
 const config = require('./index');
 
 const options = {
@@ -37,13 +38,6 @@ After running \`npm run db:seed\`:
 - **Admin**: admin@example.com / admin123456
 - **User1**: user1@example.com / user123456  
 - **User2**: user2@example.com / user123456
-
-## Getting Started
-1. Register a new account or use test accounts
-2. Login to get JWT tokens
-3. Create organizations and invite members
-4. Generate API keys for integrations
-5. Start building your AI chatbot features!
       `,
       contact: {
         name: 'API Support',
@@ -79,121 +73,18 @@ After running \`npm run db:seed\`:
         },
       },
       schemas: {
-        User: {
-          type: 'object',
-          properties: {
-            id: { type: 'string', format: 'uuid', description: 'User ID' },
-            email: { type: 'string', format: 'email', description: 'User email' },
-            firstName: { type: 'string', description: 'First name' },
-            lastName: { type: 'string', description: 'Last name' },
-            avatar: { type: 'string', format: 'uri', nullable: true, description: 'Avatar URL' },
-            role: { type: 'string', enum: ['ADMIN', 'USER'], description: 'User role' },
-            isActive: { type: 'boolean', description: 'Account status' },
-            createdAt: { type: 'string', format: 'date-time' },
-            updatedAt: { type: 'string', format: 'date-time' },
-            lastLogin: { type: 'string', format: 'date-time', nullable: true },
-          },
-        },
-        Organization: {
-          type: 'object',
-          properties: {
-            id: { type: 'string', format: 'uuid' },
-            name: { type: 'string', description: 'Organization name' },
-            slug: { type: 'string', description: 'URL-friendly identifier' },
-            description: { type: 'string', nullable: true },
-            logo: { type: 'string', format: 'uri', nullable: true },
-            planType: { type: 'string', enum: ['FREE', 'BASIC', 'PRO', 'ENTERPRISE'] },
-            planExpiry: { type: 'string', format: 'date-time', nullable: true },
-            isActive: { type: 'boolean' },
-            createdAt: { type: 'string', format: 'date-time' },
-            updatedAt: { type: 'string', format: 'date-time' },
-          },
-        },
-        ApiKey: {
-          type: 'object',
-          properties: {
-            id: { type: 'string', format: 'uuid' },
-            name: { type: 'string', description: 'API key name' },
-            permissions: { type: 'object', description: 'Key permissions' },
-            rateLimit: { type: 'integer', description: 'Requests per hour' },
-            isActive: { type: 'boolean' },
-            lastUsed: { type: 'string', format: 'date-time', nullable: true },
-            createdAt: { type: 'string', format: 'date-time' },
-            expiresAt: { type: 'string', format: 'date-time', nullable: true },
-          },
-        },
-        SuccessResponse: {
-          type: 'object',
-          properties: {
-            success: { type: 'boolean', example: true },
-            message: { type: 'string', example: 'Success message' },
-            data: { type: 'object', description: 'Response data' },
-          },
-        },
-        ErrorResponse: {
-          type: 'object',
-          properties: {
-            success: { type: 'boolean', example: false },
-            message: { type: 'string', example: 'Error message' },
-            errors: {
-              type: 'array',
-              items: {
-                type: 'object',
-                properties: {
-                  field: { type: 'string' },
-                  message: { type: 'string' },
-                },
-              },
-              description: 'Validation errors (optional)',
-            },
-          },
-        },
-        PaginatedResponse: {
-          type: 'object',
-          allOf: [
-            { $ref: '#/components/schemas/SuccessResponse' },
-            {
-              type: 'object',
-              properties: {
-                pagination: {
-                  type: 'object',
-                  properties: {
-                    total: { type: 'integer', description: 'Total items' },
-                    page: { type: 'integer', description: 'Current page' },
-                    limit: { type: 'integer', description: 'Items per page' },
-                    totalPages: { type: 'integer', description: 'Total pages' },
-                    hasNext: { type: 'boolean', description: 'Has next page' },
-                    hasPrev: { type: 'boolean', description: 'Has previous page' },
-                  },
-                },
-              },
-            },
-          ],
-        },
+        // TODO: Thêm User, Organization, ApiKey, SuccessResponse, ErrorResponse, PaginatedResponse
       },
     },
     tags: [
-      {
-        name: 'Health',
-        description: 'System health check',
-      },
-      {
-        name: 'Authentication',
-        description: 'User authentication and profile management',
-      },
-      {
-        name: 'Organizations',
-        description: 'Multi-tenant organization management',
-      },
-      {
-        name: 'API Keys',
-        description: 'API key management for external integrations',
-      },
+      { name: 'Health', description: 'System health check' },
+      { name: 'Authentication', description: 'User authentication and profile management' },
+      { name: 'Organizations', description: 'Multi-tenant organization management' },
+      { name: 'API Keys', description: 'API key management for external integrations' },
     ],
   },
-  apis: [
-    './src/routes/*.js', // paths to files containing OpenAPI definitions
-  ],
+  // 👇 đảm bảo cross-platform, match với cấu trúc project
+  apis: [path.resolve(__dirname, '../routes/*.js')],
 };
 
 const specs = swaggerJsdoc(options);
@@ -203,13 +94,14 @@ const swaggerOptions = {
   swaggerOptions: {
     persistAuthorization: true,
     displayRequestDuration: true,
-    docExpansion: 'none',
+    docExpansion: 'none', // collapse tags by default
     filter: true,
     showExtensions: true,
     showCommonExtensions: true,
   },
   customSiteTitle: 'AI Chatbot SaaS API Docs',
-  customfavIcon: '/assets/favicon.ico',
+  // ⚠️ favicon cần serve static (nếu chưa có thì bỏ dòng này đi)
+  // customfavIcon: '/favicon.ico',
   customCss: `
     .swagger-ui .topbar { display: none }
     .swagger-ui .info .title { color: #2563eb; }

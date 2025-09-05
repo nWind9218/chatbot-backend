@@ -21,66 +21,6 @@ const router = express.Router();
 
 /**
  * @swagger
- * components:
- *   schemas:
- *     RegisterRequest:
- *       type: object
- *       required:
- *         - email
- *         - password
- *         - firstName
- *         - lastName
- *       properties:
- *         email:
- *           type: string
- *           format: email
- *           example: user@example.com
- *         password:
- *           type: string
- *           minLength: 6
- *           example: password123
- *         firstName:
- *           type: string
- *           example: John
- *         lastName:
- *           type: string
- *           example: Doe
- *     LoginRequest:
- *       type: object
- *       required:
- *         - email
- *         - password
- *       properties:
- *         email:
- *           type: string
- *           format: email
- *           example: admin@example.com
- *         password:
- *           type: string
- *           example: admin123456
- *     AuthResponse:
- *       allOf:
- *         - $ref: '#/components/schemas/SuccessResponse'
- *         - type: object
- *           properties:
- *             data:
- *               type: object
- *               properties:
- *                 user:
- *                   $ref: '#/components/schemas/User'
- *                 tokens:
- *                   type: object
- *                   properties:
- *                     accessToken:
- *                       type: string
- *                       example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
- *                     refreshToken:
- *                       type: string
- *                       example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
- */
-
-/**
- * @swagger
  * /auth/register:
  *   post:
  *     summary: Register new user
@@ -92,6 +32,10 @@ const router = express.Router();
  *         application/json:
  *           schema:
  *             $ref: '#/components/schemas/RegisterRequest'
+ *           example:
+ *             email: user1@example.com
+ *             password: user123456
+ *             confirmPassword: user123456
  *     responses:
  *       201:
  *         description: User registered successfully
