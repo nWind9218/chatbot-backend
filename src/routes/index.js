@@ -7,6 +7,7 @@ const router = express.Router();
 const authRoutes = require('./auth');
 const organizationRoutes = require('./organizations');
 const apiKeyRoutes = require('./apiKeys');
+const chatbotRoutes = require('./chatbot');
 
 // Health check endpoint
 router.get('/health', (req, res) => {
@@ -22,5 +23,6 @@ router.get('/health', (req, res) => {
 router.use('/auth', authRoutes);
 router.use('/organizations', organizationRoutes);
 router.use('/api-keys', apiKeyRoutes);
+router.use('/message', chatbotRoutes);
 
 module.exports = router;
