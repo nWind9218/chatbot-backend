@@ -23,12 +23,12 @@ model User {
   lastName  String?
   avatar    String?
   role      Role     @default(USER)
-
+  verified  Boolean  @default(false)
   // Timestamps
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt // Prisma và cơ sở dữ liệu tự động quản lý. Trường này sẽ được cập nhật mỗi khi có bất kỳ thay đổi nào đối với bản ghi User đó
   lastLogin DateTime? // phải gọi new Date() để cập nhật thời gian tại ngay thời điểm đó
-  
+    
   // SaaS relationships
   organizations OrganizationMember[]
   createdOrgs   Organization[]       @relation("OrganizationCreator")

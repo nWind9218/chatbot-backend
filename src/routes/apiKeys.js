@@ -22,7 +22,7 @@ router.post('/', authenticate, createApiKey);
 
 /**
  * @route   GET /api/v1/api-keys
- * @desc    Get user's API keys
+ * @desc    Get user' s API keys
  * @access  Private
  */
 router.get('/', authenticate, getUserApiKeys);

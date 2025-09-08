@@ -22,5 +22,4 @@ router.get('/health', (req, res) => {
 router.use('/auth', authRoutes);
 router.use('/organizations', organizationRoutes);
 router.use('/api-keys', apiKeyRoutes);
-
 module.exports = router;
