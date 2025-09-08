@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Socket.IO Test</title>
+<script src="https://cdn.socket.io/4.8.1/socket.io.min.js" integrity="sha384-mkQ3/7FUtcGyoppY6bz/PORYoGqOl7/aSUMn2ymDOJcapfS6PHqxhRTMh1RR0Q6+" crossorigin="anonymous"></script></head>
+<body>
+  <h1>Test Socket.IO</h1>
+
+ <script>
+    const socket = io("http://localhost:3000", { transports: ["websocket"] });
+    socket.on("connect", () => {
+      console.log("Connected:", socket.id);
+      socket.emit("join_room", { user_id: "123" });
+      socket.emit("send_message", { user_id: "123", message: "Hello server!" });
+    });
+    socket.on("received", (data) => {
+      console.log("Nhận từ server:", data);
+    });
+    socket.on("error", (err) => {
+      console.error("Error:", err);
+    });
+  </script>
+</body>
+</html>
